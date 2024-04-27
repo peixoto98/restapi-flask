@@ -64,3 +64,8 @@ class TestApplication():
         assert response.status_code == 200
         response = client.get(f'/user/{valid_user["cpf"]}')
         assert response.json[0]["first_name"] == "Matheus"
+
+    def test_del_user(self, client, valid_user):
+        response = client.delete(f'/user/{valid_user["cpf"]}')
+        assert response.status_code == 200
+        assert b"successfully" in response.data

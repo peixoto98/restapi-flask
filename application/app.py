@@ -100,3 +100,11 @@ class User(Resource):
             return {"message":"Update successfully!"}, 200
         else:
             return {"message":"User not found in database!"}, 400
+        
+    def delete(self, cpf):
+      response = UserModel.objects(cpf=cpf)
+      if response:
+          response = UserModel.objects(cpf=cpf).delete()
+          return {"message": "User %s successfully deleted!" % response}, 200
+      else:
+          return {"message": "User not found!"}, 404
