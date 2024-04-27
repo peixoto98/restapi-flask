@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource, reqparse
 from mongoengine import NotUniqueError
-from .model import UserModel
+from .model import UserModel, HealthCheckModel
 import re
 
 _user_parser = reqparse.RequestParser()
@@ -30,6 +30,15 @@ _user_parser.add_argument('birth_date',
                           required=True,
                           help="This field cannot be blank."
                           )
+
+class HealthCheck(Resource):
+    def get(self):
+        response = HealthCheckModel.objects(status="healthcheck")
+        if response:
+            return "Healthy", 200
+        else:
+            HealthCheckModel(status="healthcheck").save()
+            return "Healthy", 200
 
 
 class Users(Resource):
