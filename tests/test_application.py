@@ -12,20 +12,20 @@ class TestApplication():
     @pytest.fixture
     def valid_user(self):
         return {
-            "first_name": "Mateus",
-            "last_name": "Muller",
+            "first_name": "Rafael",
+            "last_name": "Peixoto",
             "cpf": "641.396.500-28",
-            "email": "contato@mateusmuller.me",
+            "email": "contato@rafaelpeixoto.me",
             "birth_date": "1996-09-10"
         }
 
     @pytest.fixture
     def invalid_user(self):
         return {
-            "first_name": "Mateus",
-            "last_name": "Muller",
+            "first_name": "Rafael",
+            "last_name": "Peixoto",
             "cpf": "641.396.500-27",
-            "email": "contato@mateusmuller.me",
+            "email": "contato@rafaelpeixoto.me",
             "birth_date": "1996-09-10"
         }
 
@@ -45,10 +45,10 @@ class TestApplication():
     def test_get_user(self, client, valid_user, invalid_user):
         response = client.get('/user/%s' % valid_user["cpf"])
         assert response.status_code == 200
-        assert response.json[0]["first_name"] == "Mateus"
-        assert response.json[0]["last_name"] == "Muller"
+        assert response.json[0]["first_name"] == "Rafael"
+        assert response.json[0]["last_name"] == "Peixoto"
         assert response.json[0]["cpf"] == "641.396.500-28"
-        assert response.json[0]["email"] == "contato@mateusmuller.me"
+        assert response.json[0]["email"] == "contato@rafaelpeixoto.me"
 
         birth_date = response.json[0]["birth_date"]["$date"]
         assert birth_date == "1996-09-10T00:00:00Z"
@@ -56,3 +56,11 @@ class TestApplication():
         response = client.get('/user/%s' % invalid_user["cpf"])
         assert response.status_code == 400
         assert b"User does not exist in database!" in response.data
+    
+    def test_patch_user(self, client, valid_user):
+        valid_user["first_name"] = "Matheus"
+        response = client.patch(f'/user/{valid_user["cpf"]}', json=valid_user)
+        assert b"successfully" in response.data
+        assert response.status_code == 200
+        response = client.get(f'/user/{valid_user["cpf"]}')
+        assert response.json[0]["first_name"] == "Matheus"

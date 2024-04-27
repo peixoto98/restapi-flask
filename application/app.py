@@ -87,3 +87,16 @@ class User(Resource):
             return jsonify(response)
 
         return {"message": "User does not exist in database!"}, 400
+    
+    def patch(self):
+        data = _user_parser.parse_args()
+
+        if not self.validate_cpf(data["cpf"]):
+            return {"message": "CPF is invalid!"}, 400
+
+        response = UserModel.objects(cpf=data["cpf"])
+        if response:
+            response.update(**data)
+            return {"message":"Update successfully!"}, 200
+        else:
+            return {"message":"User not found in database!"}, 400
