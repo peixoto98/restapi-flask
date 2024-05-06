@@ -10,7 +10,7 @@ compose:
 	@docker-compose build
 	@docker-compose up
 
-setup:
+setup-dev:
 	@kind create cluster --config kubernetes/config.yaml
 
 	# @kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.5/config/manifests/metallb-native.yaml
@@ -27,13 +27,21 @@ setup:
 	   --timeout=90s
 
 	@helm repo add bitnami https://charts.bitnami.com/bitnami
-	@helm upgrade --install mongodb -n mongodb --create-namespace --set auth.rootPassword="root" bitnami/mongodb --version 12.1.31
-	@kubectl wait --namespace mongodb
-	  --for=condition=ready pod \
-	  --selector=app.kubernetes.io/component=controller \
-	  --timeout=270s
+	@helm upgrade --install mongodb --set auth.rootPassword="root" bitnami/mongodb --version 12.1.31
+	@kubectl wait \
+	   --for=condition=ready pod \
+	   --selector=app.kubernetes.io/component=mongodb \
+	   --timeout=270s
 
 	@kubectl cluster-info --context kind-kind
+
+deploy-dev:
+	@docker build -t $(APP):latest .
+	@kind load docker-image $(APP):latest
+	@kubectl apply -f kubernetes/manifests
+	@kubectl rollout restart deploy restapi-flask
+
+dev: setup-dev deploy-dev
 
 teardown:
 	@kind delete clusters kind
